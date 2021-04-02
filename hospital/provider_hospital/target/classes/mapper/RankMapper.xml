@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.etc.hospital.fl.dao.RankDao">
+
+  <resultMap id="BaseResultMap" type="com.etc.hospital.fl.entity.Rank">
+    <id column="rank_id" jdbcType="INTEGER" property="rankId" />
+    <result column="rank_name" jdbcType="VARCHAR" property="rankName" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    rank_id, rank_name
+  </sql>
+
+
+ <!--
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from h_rank
+    where rank_id = #{rankId,jdbcType=INTEGER}
+  </select>
+
+  -->
+  <!-- 查询全部-->
+  <select id="selectAllRank"  resultType="rank" >
+    select  * from h_rank
+  </select>
+
+
+  <!-- 查询一个-->
+  <select id="selectRankById"  resultType="rank" parameterType="java.lang.Integer">
+    select  * from  h_rank  where  rank_id=#{param1}
+  </select>
+
+
+
+
+
+
+<!--
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from h_rank
+    where rank_id = #{rankId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.etc.hospital.fl.entity.Rank">
+    insert into h_rank (rank_id, rank_name)
+    values (#{rankId,jdbcType=INTEGER}, #{rankName,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.etc.hospital.fl.entity.Rank">
+    insert into h_rank
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="rankId != null">
+        rank_id,
+      </if>
+      <if test="rankName != null">
+        rank_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="rankId != null">
+        #{rankId,jdbcType=INTEGER},
+      </if>
+      <if test="rankName != null">
+        #{rankName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.etc.hospital.fl.entity.Rank">
+    update h_rank
+    <set>
+      <if test="rankName != null">
+        rank_name = #{rankName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where rank_id = #{rankId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.etc.hospital.fl.entity.Rank">
+    update h_rank
+    set rank_name = #{rankName,jdbcType=VARCHAR}
+    where rank_id = #{rankId,jdbcType=INTEGER}
+  </update>
+-->
+</mapper>

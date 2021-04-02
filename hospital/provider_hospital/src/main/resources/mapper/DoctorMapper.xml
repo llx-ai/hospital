@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.etc.hospital.fl.dao.DoctorDao">
+  <resultMap id="BaseResultMap" type="com.etc.hospital.fl.entity.Doctor">
+    <id column="doctor_id" jdbcType="INTEGER" property="doctorId" />
+    <result column="doctor_pwd" jdbcType="VARCHAR" property="doctorPwd" />
+    <result column="doctor_name" jdbcType="VARCHAR" property="doctorName" />
+    <result column="doctor_dept" jdbcType="INTEGER" property="doctorDept" />
+    <result column="doctor_phone" jdbcType="VARCHAR" property="doctorPhone" />
+    <result column="doctor_sex" jdbcType="INTEGER" property="doctorSex" />
+    <result column="doctor_img" jdbcType="VARCHAR" property="doctorImg" />
+    <result column="doctor_time" jdbcType="TIMESTAMP" property="doctorTime" />
+    <result column="doctor_rank" jdbcType="INTEGER" property="doctorRank" />
+    <result column="doctor_specialty" jdbcType="VARCHAR" property="doctorSpecialty" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.etc.hospital.fl.entity.Doctor">
+    <result column="doctor_resume" jdbcType="LONGVARBINARY" property="doctorResume" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    doctor_id, doctor_pwd, doctor_name, doctor_dept, doctor_phone, doctor_sex, doctor_img, 
+    doctor_time, doctor_rank, doctor_specialty
+  </sql>
+  <sql id="Blob_Column_List">
+    doctor_resume
+  </sql>
+  
+  
+  <!--新增一个医生的信息-->
+  <insert id="insertADoctor" parameterType="doctor">
+    insert into h_doctor(doctor_pwd, doctor_name, doctor_dept, doctor_phone,
+                        doctor_sex, doctor_rank)
+           values (123456,#{doctor_name},#{doctor_dept},#{doctor_phone},#{doctor_sex},#{doctor_rank})
+  </insert>
+
+  <!--判断该医生是否已存在，是否可以注册-->
+  <select id="selectDoctorByPhone" resultType="java.lang.Integer" parameterType="java.lang.String">
+    select count(*) from h_doctor where doctor_phone=#{param1}
+  </select>
+
+  <!--判断医生是否可以登录，并存入对象-->
+  <select id="checkDoctorLogin" resultType="com.etc.hospital.fl.dto.DoctorCondition">
+    select * from h_doctor do,h_dept de,h_rank ra where doctor_phone=#{doctor_phone}
+    and do.doctor_pwd=#{doctor_pwd} and do.doctor_dept=de.dept_id and do.doctor_rank=ra.rank_id
+  </select>
+
+
+  <!--管理员查询所有医生的信息-->
+  <select id="selectAllDoctorByAdmin" resultType="com.etc.hospital.fl.dto.DoctorCondition">
+    select * from h_doctor do,h_dept de,h_rank ra where do.doctor_dept=de.dept_id and do.doctor_rank=ra.rank_id
+  </select>
+
+
+  <!-- 管理员多条件查询医生的信息-->
+  <select id="selectDoctorByCondition" parameterType="com.etc.hospital.fl.dto.DoctorCondition" resultType="com.etc.hospital.fl.dto.DoctorCondition">
+    select * from h_doctor do,h_dept de,h_rank ra
+      <where>
+            do.doctor_dept=de.dept_id and do.doctor_rank=ra.rank_id
+        <if test="doctor_sex!=null"> <!-- 查询性别-->
+          and doctor_sex=#{doctor_sex}
+        </if>
+        <if test="doctor_name!= null and doctor_name!=''">  <!-- 查询医生的姓名-->
+          and doctor_name  like "%"#{doctor_name}"%"
+        </if>
+        <if test="doctor_dept!= null">  <!-- 查询医生的部门-->
+          and doctor_dept=#{doctor_dept}
+        </if>
+        <if test="doctor_rank!= null">  <!-- 查询医生的职称-->
+          and doctor_rank=#{doctor_rank}
+        </if>
+        <if test="doctor_phone!= null and doctor_phone!=''">  <!-- 查询医生的手机号模糊查询-->
+         and  doctor_phone like "%"#{doctor_phone}"%"
+        </if>
+    </where>
+  </select>
+
+
+
+  <!--患者医生查询所有医生的信息-->
+  <select id="selectAllDoctor" resultType="com.etc.hospital.fl.dto.DoctorShow">
+    select * from h_doctor do,h_dept de,h_rank ra where do.doctor_dept=de.dept_id and do.doctor_rank=ra.rank_id
+  </select>
+
+
+  <!--医生修改个人的信息-->
+  <update id="updateDoctorInfo" parameterType="com.etc.hospital.fl.dto.DoctorCondition">
+    update h_doctor do,h_dept de,h_rank ra
+    <set>
+      <if test="doctor_name!= null and doctor_name != ''">
+        doctor_name = #{doctor_name},
+      </if>
+      <if test="doctor_pwd != null and doctor_pwd != ''">
+        doctor_pwd = #{doctor_pwd},
+      </if>
+      <if test="doctor_phone != null and doctor_phone != ''">
+        doctor_phone = #{doctor_phone},
+      </if>
+      <if test="doctor_sex != null">
+        doctor_sex = #{doctor_sex},
+      </if>
+      <if test="doctor_img != null and doctor_img != ''">
+        doctor_img = #{doctor_img},
+      </if>
+      <if test="doctor_resume != null and doctor_resume != ''">
+        doctor_resume = #{doctor_resume},
+      </if>
+      <if test="doctor_specialty != null and doctor_specialty != ''">
+        doctor_specialty = #{doctor_specialty},
+      </if>
+
+    </set>
+    where do.doctor_id=#{doctor_id} and do.doctor_dept=de.dept_id and do.doctor_rank=ra.rank_id
+
+  </update>
+
+
+  <select id="selectDoctorById" resultType="com.etc.hospital.fl.dto.DoctorShow">
+    select * from h_doctor do,h_dept de,h_rank ra where do.doctor_id=#{param}
+    and do.doctor_dept=de.dept_id and do.doctor_rank=ra.rank_id
+  </select>
+
+  <select id="selectDoctorByDeptId" resultType="com.etc.hospital.fl.dto.DoctorShow">
+      select * from h_doctor do,h_dept de,h_rank ra where do.doctor_dept=#{param}
+      and do.doctor_dept=de.dept_id and do.doctor_rank=ra.rank_id
+  </select>
+
+  <select id="selectDoctorByRankId" resultType="com.etc.hospital.fl.dto.DoctorShow">
+    select * from h_doctor do,h_dept de,h_rank ra where do.doctor_rank=#{param}
+    and do.doctor_dept=de.dept_id and do.doctor_rank=ra.rank_id
+  </select>
+
+  <update id="updateDoctorDept" parameterType="java.lang.Integer">
+    update h_doctor set
+     doctor_dept=#{param2}
+    where doctor_id=#{param1}
+  </update>
+
+  <update id="updateDoctorRank" parameterType="java.lang.Integer">
+    update h_doctor set
+     doctor_rank=#{param2}
+     where doctor_id=#{param1}
+  </update>
+
+
+  <!--
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from h_doctor
+    where doctor_id = #{doctorId,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from h_doctor
+    where doctor_id = #{doctorId,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.etc.hospital.fl.entity.Doctor">
+    insert into h_doctor (doctor_id, doctor_pwd, doctor_name,
+      doctor_dept, doctor_phone, doctor_sex, 
+      doctor_img, doctor_time, doctor_rank, 
+      doctor_specialty, doctor_resume)
+    values (#{doctorId,jdbcType=INTEGER}, #{doctorPwd,jdbcType=VARCHAR}, #{doctorName,jdbcType=VARCHAR}, 
+      #{doctorDept,jdbcType=INTEGER}, #{doctorPhone,jdbcType=VARCHAR}, #{doctorSex,jdbcType=INTEGER}, 
+      #{doctorImg,jdbcType=VARCHAR}, #{doctorTime,jdbcType=TIMESTAMP}, #{doctorRank,jdbcType=INTEGER}, 
+      #{doctorSpecialty,jdbcType=VARCHAR}, #{doctorResume,jdbcType=LONGVARBINARY})
+  </insert>
+  <insert id="insertSelective" parameterType="com.etc.hospital.fl.entity.Doctor">
+    insert into h_doctor
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="doctorId != null">
+        doctor_id,
+      </if>
+      <if test="doctorPwd != null">
+        doctor_pwd,
+      </if>
+      <if test="doctorName != null">
+        doctor_name,
+      </if>
+      <if test="doctorDept != null">
+        doctor_dept,
+      </if>
+      <if test="doctorPhone != null">
+        doctor_phone,
+      </if>
+      <if test="doctorSex != null">
+        doctor_sex,
+      </if>
+      <if test="doctorImg != null">
+        doctor_img,
+      </if>
+      <if test="doctorTime != null">
+        doctor_time,
+      </if>
+      <if test="doctorRank != null">
+        doctor_rank,
+      </if>
+      <if test="doctorSpecialty != null">
+        doctor_specialty,
+      </if>
+      <if test="doctorResume != null">
+        doctor_resume,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="doctorId != null">
+        #{doctorId,jdbcType=INTEGER},
+      </if>
+      <if test="doctorPwd != null">
+        #{doctorPwd,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorName != null">
+        #{doctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorDept != null">
+        #{doctorDept,jdbcType=INTEGER},
+      </if>
+      <if test="doctorPhone != null">
+        #{doctorPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorSex != null">
+        #{doctorSex,jdbcType=INTEGER},
+      </if>
+      <if test="doctorImg != null">
+        #{doctorImg,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorTime != null">
+        #{doctorTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="doctorRank != null">
+        #{doctorRank,jdbcType=INTEGER},
+      </if>
+      <if test="doctorSpecialty != null">
+        #{doctorSpecialty,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorResume != null">
+        #{doctorResume,jdbcType=LONGVARBINARY},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.etc.hospital.fl.entity.Doctor">
+    update h_doctor
+    <set>
+      <if test="doctorPwd != null">
+        doctor_pwd = #{doctorPwd,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorName != null">
+        doctor_name = #{doctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorDept != null">
+        doctor_dept = #{doctorDept,jdbcType=INTEGER},
+      </if>
+      <if test="doctorPhone != null">
+        doctor_phone = #{doctorPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorSex != null">
+        doctor_sex = #{doctorSex,jdbcType=INTEGER},
+      </if>
+      <if test="doctorImg != null">
+        doctor_img = #{doctorImg,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorTime != null">
+        doctor_time = #{doctorTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="doctorRank != null">
+        doctor_rank = #{doctorRank,jdbcType=INTEGER},
+      </if>
+      <if test="doctorSpecialty != null">
+        doctor_specialty = #{doctorSpecialty,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorResume != null">
+        doctor_resume = #{doctorResume,jdbcType=LONGVARBINARY},
+      </if>
+    </set>
+    where doctor_id = #{doctorId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.etc.hospital.fl.entity.Doctor">
+    update h_doctor
+    set doctor_pwd = #{doctorPwd,jdbcType=VARCHAR},
+      doctor_name = #{doctorName,jdbcType=VARCHAR},
+      doctor_dept = #{doctorDept,jdbcType=INTEGER},
+      doctor_phone = #{doctorPhone,jdbcType=VARCHAR},
+      doctor_sex = #{doctorSex,jdbcType=INTEGER},
+      doctor_img = #{doctorImg,jdbcType=VARCHAR},
+      doctor_time = #{doctorTime,jdbcType=TIMESTAMP},
+      doctor_rank = #{doctorRank,jdbcType=INTEGER},
+      doctor_specialty = #{doctorSpecialty,jdbcType=VARCHAR},
+      doctor_resume = #{doctorResume,jdbcType=LONGVARBINARY}
+    where doctor_id = #{doctorId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.etc.hospital.fl.entity.Doctor">
+    update h_doctor
+    set doctor_pwd = #{doctorPwd,jdbcType=VARCHAR},
+      doctor_name = #{doctorName,jdbcType=VARCHAR},
+      doctor_dept = #{doctorDept,jdbcType=INTEGER},
+      doctor_phone = #{doctorPhone,jdbcType=VARCHAR},
+      doctor_sex = #{doctorSex,jdbcType=INTEGER},
+      doctor_img = #{doctorImg,jdbcType=VARCHAR},
+      doctor_time = #{doctorTime,jdbcType=TIMESTAMP},
+      doctor_rank = #{doctorRank,jdbcType=INTEGER},
+      doctor_specialty = #{doctorSpecialty,jdbcType=VARCHAR}
+    where doctor_id = #{doctorId,jdbcType=INTEGER}
+  </update>
+
+  -->
+</mapper>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.etc.hospital.fl.dao.OrderDao">
+  <resultMap id="BaseResultMap" type="com.etc.hospital.fl.entity.Order">
+    <id column="order_id"  property="order_id" />
+    <result column="order_patient"  property="order_patient" />
+    <result column="order_time"  property="order_time" />
+    <result column="order_state"  property="order_state" />
+    <result column="order_comment" jdbcType="VARCHAR" property="order_comment" />
+    <result column="order_date"  property="order_date" />
+    <result column="order_doctor"  property="order_doctor" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    order_id, order_patient, order_time, order_state,order_comment,order_date,order_doctor
+  </sql>
+
+  <select id="selectAll" resultType="com.etc.hospital.fl.dto.OrderShow">
+        select *  FROM h_order,h_patient,h_doctor WHERE order_doctor=doctor_id and order_patient=patient_id
+    </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.etc.hospital.fl.dto.OrderShow">
+    select * from h_order where order_id = #{orderId}
+  </select>
+
+  <select id="selectbypatient" parameterType="java.lang.Integer" resultType="com.etc.hospital.fl.dto.OrderShow">
+    select * from h_order where order_patient = #{order_patient}
+  </select>
+  <select id="selectbyDoctor" parameterType="java.lang.Integer" resultType="com.etc.hospital.fl.dto.OrderShow">
+    select * from h_order where order_doctor = #{order_doctor}
+  </select>
+
+  <select id="selectordersum" resultType="java.lang.Integer">
+    select count(*) FROM h_order where order_date=#{order_date}  and order_doctor=#{order_doctor} and   order_state=101
+  </select>
+
+  <!-- 管理员多条件查询的信息-->
+  <select id="selectOrderByCondition" parameterType="com.etc.hospital.fl.dto.OrderShow" resultType="com.etc.hospital.fl.dto.OrderShow">
+    select *  FROM h_order,h_patient,h_doctor
+    <where>
+      order_doctor=doctor_id and order_patient=patient_id
+      <if test="patient_name!=null and patient_name!=''">
+        and patient_name like "%"#{patient_name}"%"
+      </if>
+      <if test="order_doctor!=null and order_doctor!=''">
+        and order_doctor =#{order_doctor}
+      </if>
+      <if test="order_patient!=null and order_patient!=''">
+        and order_patient =#{order_patient}
+      </if>
+      <if test="patient_name!=null and patient_name!=''">
+        and patient_name like "%"#{patient_name}"%"
+      </if>
+
+      <if test="doctor_name!= null and doctor_name!=''">  <!-- 查询医生的姓名-->
+        and doctor_name  like "%"#{doctor_name}"%"
+      </if>
+      <if test="order_time!= null">
+        and TO_DAYS(order_time)=TO_DAYS(#{order_time})
+      </if>
+      <if test="order_date!= null">
+        and TO_DAYS(order_date)=TO_DAYS(#{order_date})
+      </if>
+      <if test="order_state!= null">
+        and order_state=#{order_state}
+      </if>
+    </where>
+  </select>
+
+
+
+  <insert id="insert" parameterType="com.etc.hospital.fl.entity.Order">
+    insert into h_order (order_id, order_patient, order_state,order_comment,order_date,order_doctor)
+    values (#{order_id},#{order_patient},#{order_state},#{order_comment},#{order_date},#{order_doctor})
+  </insert>
+  <!-- 修改用户-->
+  <update id="updateByPrimaryKeySelective" parameterType="order">
+    update h_order
+    <trim prefix="set" suffixOverrides="," suffix=" where order_id = #{order_id}">
+      <if test="order_patient!=null and order_patient!=''">
+        order_patient=#{order_patient},
+      </if>
+      <if test="order_time!=null and order_time!=''">
+        order_time=#{order_time},
+      </if>
+      <if test="order_state!=null and order_state!=''">
+        order_state=#{order_state},
+      </if>
+      <if test="order_comment!=null and order_comment!=''">
+        order_comment=#{order_comment},
+      </if>
+      <if test="order_date!=null and order_date!=''">
+        order_date=#{order_date},
+      </if>
+      <if test="order_doctor!=null  and order_doctor!=''">
+        order_doctor=#{order_doctor},
+      </if>
+
+
+    </trim>
+  </update>
+
+  <update id="check">
+    UPDATE h_order set order_state=101 WHERE TIMESTAMPDIFF(MINUTE,order_time,NOW())>30 and order_state=100
+  </update>
+
+
+
+</mapper>

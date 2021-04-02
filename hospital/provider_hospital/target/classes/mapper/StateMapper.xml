@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.etc.hospital.fl.dao.StateDao">
+    <resultMap id="BaseResultMap" type="com.etc.hospital.fl.entity.State">
+        <id column="state_id" jdbcType="INTEGER" property="stateId" />
+        <result column="state_comment" jdbcType="VARCHAR" property="stateComment" />
+    </resultMap>
+    <select id="selectAll" resultType="state">
+        select * from h_state
+    </select>
+    <select id="selectById" resultType="state">
+        select * from h_state where state_id=#{state_id}
+    </select>
+
+</mapper>

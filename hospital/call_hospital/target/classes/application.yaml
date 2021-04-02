@@ -1,0 +1,33 @@
+server:
+  port: 8877
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8888/eureka/   #要连接的注册中心（eureka服务器）地址
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: eureka-client-call-feign
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+feign:
+  hystrix:
+    enabled: true  #打开feign断路器功能
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
+ribbon:
+  ReadTimeout: 5000
+  ConnectTimeout: 5000
+

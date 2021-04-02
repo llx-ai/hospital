@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.etc.hospital.fl.dao.ScheduleDao">
+
+  <resultMap id="Schedule_doctor_ResultMap" type="com.etc.hospital.fl.dto.Schedule_doctor">
+    <result column="schedule_number" jdbcType="INTEGER" property="schedule_number" />
+    <result column="doctor_id" jdbcType="INTEGER" property="doctor_id" />
+    <result column="doctor_name" jdbcType="VARCHAR" property="doctor_name" />
+    <result column="doctor_img" jdbcType="VARCHAR" property="doctor_img" />
+    <result column="doctor_specialty" jdbcType="VARCHAR" property="doctor_specialty" />
+    <result column="doctor_rank" jdbcType="VARCHAR" property="doctor_rank" />
+    <result column="doctor_dept" jdbcType="VARCHAR" property="doctor_dept" />
+  </resultMap>
+
+  <resultMap id="Schedule_doctor_ResultMap2" type="com.etc.hospital.fl.dto.Schedule_doctor">
+    <result column="doctor_id" jdbcType="INTEGER" property="doctor_id" />
+    <result column="doctor_name" jdbcType="VARCHAR" property="doctor_name" />
+    <result column="schedule_mon" jdbcType="INTEGER" property="schedule_mon" />
+    <result column="schedule_tue" jdbcType="INTEGER" property="schedule_tue" />
+    <result column="schedule_wed" jdbcType="INTEGER" property="schedule_wed" />
+    <result column="schedule_thu" jdbcType="INTEGER" property="schedule_thu" />
+    <result column="schedule_fri" jdbcType="INTEGER" property="schedule_fri" />
+    <result column="schedule_sat" jdbcType="INTEGER" property="schedule_sat" />
+    <result column="schedule_sun" jdbcType="INTEGER" property="schedule_sun" />
+  </resultMap>
+
+  <!--根据条件显示排班医生列表 -->
+  <select id="showScheduleDoctor" parameterType="java.util.Map" resultMap="Schedule_doctor_ResultMap">
+    select distinct schedule_number, doctor_id , doctor_name,doctor_img,doctor_specialty,(select rank_name FROM h_rank where rank_id = doctor_rank) as doctor_rank,(select dept_name FROM h_dept where dept_id = doctor_dept) as doctor_dept  from h_doctor join h_schedule on schedule_doctor = doctor_id
+    <where>
+        1=1
+      <if test="deptId != '' and deptId != null ">
+        and schedule_dept = #{deptId}
+      </if>
+      <if test="day == 'schedule_mon' ">
+        and schedule_mon = #{dateId} or schedule_mon = 3
+      </if>
+      <if test="day == 'schedule_tue' ">
+        and schedule_tue = #{dateId} or schedule_tue = 3
+      </if>
+      <if test="day == 'schedule_wed' ">
+        and schedule_wed = #{dateId} or schedule_wed = 3
+      </if>
+      <if test="day == 'schedule_thu' ">
+        and schedule_thu = #{dateId} or schedule_thu = 3
+      </if>
+      <if test="day == 'schedule_fri' ">
+        and schedule_fri = #{dateId} or schedule_fri = 3
+      </if>
+      <if test="day == 'schedule_sat' ">
+        and schedule_sat = #{dateId} or schedule_sat = 3
+      </if>
+      <if test="day == 'schedule_sun' ">
+        and schedule_sun = #{dateId} or schedule_sun = 3
+      </if>
+    </where>
+  </select>
+
+
+  <!--修改医生排班信息-->
+  <update id="updateSchedule" parameterType="java.util.Map">
+    update h_schedule
+    <set>
+      <if test="day == 'schedule_mon'">
+        schedule_mon = #{dateId},
+      </if>
+      <if test="day == 'schedule_tue'">
+        schedule_tue = #{dateId},
+      </if>
+      <if test="day == 'schedule_wed'">
+        schedule_wed = #{dateId},
+      </if>
+      <if test="day == 'schedule_thu'">
+        schedule_thu = #{dateId},
+      </if>
+      <if test="day == 'schedule_fri'">
+        schedule_fri = #{dateId},
+      </if>
+      <if test="day == 'schedule_sat'">
+        schedule_sat = #{dateId},
+      </if>
+      <if test="day == 'schedule_sun'">
+        schedule_sun = #{dateId},
+      </if>
+      <if test="schedule_num != null and shcedule_num != ''">
+        schedule_num = #{schedule_num}
+      </if>
+
+    </set>
+        where schedule_doctor = #{doctor_id}
+  </update>
+
+  <!--根据医生id查看排班信息 -->
+  <select id="showScheduleByDoctor" resultType="schedule">
+    select * from h_schedule where schedule_doctor =#{doctor_id}
+  </select>
+
+  <!-- 根据医生姓名模糊查询排班信息 -->
+  <select id="showScheduleByDoctorName" resultMap="Schedule_doctor_ResultMap2">
+    select doctor_id,doctor_name, schedule_mon,schedule_tue,schedule_wed,schedule_thu,schedule_fri,schedule_sat,schedule_sun from h_schedule join h_doctor on doctor_id = schedule_doctor where doctor_name like '%'#{doctor_name}'%'
+  </select>
+
+  <!--根据科室查看排班信息 -->
+  <select id="showScheduleByDept" resultMap="Schedule_doctor_ResultMap2">
+      select doctor_id,(select doctor_name from h_doctor where doctor_id = schedule_doctor) as doctor_name, schedule_mon,schedule_tue,schedule_wed,schedule_thu,schedule_fri,schedule_sat,schedule_sun from h_schedule join h_doctor on schedule_doctor = doctor_id where schedule_dept = #{deptId}
+  </select>
+
+
+
+</mapper>

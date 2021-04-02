@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.etc.hospital.fl.dao.PatientDao">
+
+    <!--<resultMap id="BaseResultMap" type="com.etc.hospital.fl.dto.Patient_Order_Doctor">
+        <result column="patient_name"  property="patient_name" />
+        <result column="patient_phone"  property="patient_phone" />
+        <result column="patient_sex" property="patient_sex" />
+        <result column="patient_birth"  property="patient_birth" />
+        <result column="age" property="age" />
+    </resultMap>-->
+
+    <!--患者登录-->
+    <select id="checkLogin" parameterType="patient" resultType="patient">
+   select * from h_patient where patient_phone=#{patient_phone} and patient_pwd=#{patient_pwd}
+  </select>
+
+    <!--患者注册-->
+    <insert id="register" parameterType="patient">
+    insert into h_patient (patient_name,patient_phone,patient_pwd,patient_sex,patient_birth,patient_idcard,patient_img)
+    values (#{patient_name}, #{patient_phone}, #{patient_pwd},
+      #{patient_sex}, #{patient_birth}, #{patient_idcard},
+      #{patient_img})
+  </insert>
+
+    <!--患者查询所有科室-->
+    <select id="queryAllDept" resultType="Dept">
+    select * from h_dept
+    </select>
+
+    <!--管理员浏览所有患者信息-->
+    <select id="queryAllPatient" resultType="Patient">
+       select patient_name,patient_phone,patient_sex,patient_birth from h_patient
+   </select>
+
+    <!--患者修改个人信息-->
+    <update id="changeInfo" parameterType="patient">
+        update h_patient
+        <trim prefix="set" suffixOverrides="," suffix=" where patient_id = #{patient_id}">
+            <if test="patient_phone!=null and patient_phone!=''">
+                patient_phone=#{patient_phone},
+            </if>
+            <if test="patient_birth!=null">
+                patient_birth=#{patient_birth},
+            </if>
+            <if test="patient_pwd!=null and patient_pwd!=''">
+                patient_pwd=#{patient_pwd},
+            </if>
+            <if test="patient_img!=null and patient_img!=''">
+                patient_img=#{patient_img},
+            </if>
+            <if test="patient_sex!=null and patient_sex!=''">
+                patient_sex=#{patient_sex},
+            </if>
+        </trim>
+    </update>
+
+    <!--根据患者id查找患者信息-->
+    <select id="queryPatientById" resultType="patient">
+        select * from h_patient where patient_id=#{patient_id}
+    </select>
+
+    <!--根据患者id查找患者信息-->
+    <select id="queryPatientByPhone" resultType="patient">
+        select * from h_patient where patient_phone=#{patient_phone}
+    </select>
+
+
+    <!--根据患者姓名模糊查找患者信息-->
+    <select id="queryPatientByName" resultType="patient">
+        select patient_name,patient_phone,patient_sex,patient_birth,YEAR(NOW())-YEAR(patient_birth) as age from h_patient where patient_name like "%"#{patient_name}"%"
+    </select>
+
+    <!--根据患者是否成年查询患者信息-->
+    <select id="queryPatientByAge" resultType="com.etc.hospital.fl.dto.Patient_Order_Doctor">
+        SELECT patient_id,patient_name,patient_img,patient_phone,patient_sex,patient_birth,YEAR(NOW())-YEAR(patient_birth) as age,patient_time FROM
+        h_patient
+        <where>
+            1=1
+            <if test="IsOld !=''and IsOld == 2">
+                and YEAR(NOW())-YEAR(patient_birth) &lt; 18
+            </if>
+            <if test="IsOld !=''and IsOld == 1">
+                and YEAR(NOW())-YEAR(patient_birth) &gt;= 18
+            </if>
+
+        </where>
+    </select>
+
+    <!--&lt;!&ndash;根据患者是否成年查询患者信息小于等于18&ndash;&gt;-->
+    <!--<select id="queryPatientByAge" resultType="Patient">-->
+    <!--SELECT patient_name,patient_phone,patient_sex,patient_birth,YEAR(NOW())-YEAR(patient_birth) as age FROM h_patient-->
+    <!--where YEAR(NOW())-YEAR(patient_birth) &gt;= 18-->
+    <!--</select>-->
+
+    <!--根据患者性别查找患者信息-->
+    <select id="queryPatientBySex" resultType="patient">
+        select patient_name,patient_phone,patient_sex,patient_birth,YEAR(NOW())-YEAR(patient_birth) AS age from h_patient where patient_sex=#{patient_sex}
+    </select>
+
+
+    <!-- 管理员多条件查询的信息-->
+    <select id="selectPatientCondition" parameterType="com.etc.hospital.fl.entity.Patient" resultType="com.etc.hospital.fl.entity.Patient">
+        select *  FROM  h_patient
+        <where>
+            1=1
+            <if test="patient_name!=null and patient_name!=''">
+                and patient_name like "%"#{patient_name}"%"
+            </if>
+            <if test="patient_phone!= null and patient_phone!=''">  <!-- 查询医生的姓名-->
+                and patient_phone  like "%"#{patient_phone}"%"
+            </if>
+
+            <if test="patient_idcard!= null and patient_idcard!=''">  <!-- 查询医生的姓名-->
+                and patient_idcard  like "%"#{patient_idcard}"%"
+            </if>
+            <if test="patient_birth!= null">
+                and patient_birth=#{patient_birth}
+            </if>
+            <if test="patient_sex!= null">
+                and patient_sex=#{patient_sex}
+            </if>
+            <if test="patient_id!= null">
+                and patient_id=#{patient_id}
+            </if>
+        </where>
+    </select>
+</mapper>
